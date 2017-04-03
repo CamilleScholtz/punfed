@@ -71,7 +71,7 @@ type ScopeConfiguration struct {
 	// which could respond with an Error of its own, poorly obscuring where this plugin is used.
 	SilenceAuthErrors bool
 
-	// The user must set a "flag of shame" for sites that don't use TLS with 'upload'. (read-only)
+	// The user must set a "flag of shame" for sites that don't use TLS with 'punfed'. (read-only)
 	// This keeps track of whether said flags has been set.
 	AcknowledgedNoTLS bool
 
