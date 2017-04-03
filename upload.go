@@ -167,7 +167,8 @@ func (h *Handler) WriteOneHTTPBlob(w http.ResponseWriter, r *http.Request, sc st
 		return bw, http.StatusInternalServerError, err
 	}
 
-	fmt.Fprintln(w, "https://"+r.Host+"/"+filepath.Join(strings.TrimPrefix(conf.WriteToPath, sc), fn))
+	// TODO: Add strings.TrimPrefix(conf.WriteToPath, sc).
+	fmt.Fprintln(w, "https://"+r.Host+"/"+fn)
 
 	if bw < eb {
 		// 202: Accepted (but not completed).
