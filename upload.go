@@ -144,10 +144,16 @@ func (h *Handler) WriteOneHTTPBlob(w http.ResponseWriter, r *http.Request, sc st
 		// We don't require any length; but it must be valid if given.
 	}
 
-	if conf.FilenameLength > 0 {
-		fn = genRand(conf.FilenameLength) + filepath.Ext(fn)
-	} else {
-		fn = genRand(4) + filepath.Ext(fn)
+	for {
+		if conf.FilenameLength > 0 {
+			fn = genRand(conf.FilenameLength) + filepath.Ext(fn)
+		} else {
+			fn = genRand(4) + filepath.Ext(fn)
+		}
+
+		if _, err := os.Stat(filepath.Join(conf.WriteToPath, fn)); err == nil {
+			break
+		}
 	}
 
 	cb := conf.UploadProgressCallback
