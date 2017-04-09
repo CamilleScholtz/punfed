@@ -151,7 +151,7 @@ func (h *Handler) WriteOneHTTPBlob(w http.ResponseWriter, r *http.Request, sc st
 			fn = genRand(4) + filepath.Ext(fn)
 		}
 
-		if _, err := os.Stat(filepath.Join(conf.WriteToPath, fn)); err == nil {
+		if _, err := os.Stat(filepath.Join(conf.WriteToPath, fn)); os.IsNotExist(err) {
 			break
 		}
 	}
