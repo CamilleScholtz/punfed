@@ -17,19 +17,24 @@ type handler struct {
 // TODO: Check for POST Postform/Form
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 	error) {
+	if r.Method != http.MethodPost && !httpserver.Path(r.URL.Path).Matches(
+		h.Config.Scope) {
+		return h.Next.ServeHTTP(w, r)
+	}
+
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		return 0, err
+		return http.StatusBadRequest, err
 	}
 
 	if err := h.key(w, r); err != nil {
-		return 0, err
+		return http.StatusUnauthorized, err
 	}
 
 	if err := h.file(w, r); err != nil {
-		return 0, err
+		return http.StatusBadRequest, err
 	}
 
-	return 0, nil
+	return http.StatusCreated, nil
 }
 
 func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
