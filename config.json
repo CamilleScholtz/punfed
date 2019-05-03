@@ -1,6 +1,0 @@
-{
-  "directive": "punfed",
-  "source": "github.com/onodera-punpun/punfed",
-  "after": "basicauth",
-  "args": "-port 8080"
-}

@@ -1,0 +1,9 @@
+url  = ":1337"
+dest = "/root/wrk/src/github.com/onodera-punpun/upload-go/files"
+
+filenamelength = 4
+
+keys = [
+	{ user = "onodera",      pass = "hunter2" },
+	{ user = "vista-narvas", pass = "test" },
+]
