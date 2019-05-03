@@ -20,38 +20,40 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 	cfg := &config{}
 
 	for c.Next() {
-		switch c.Val() {
-		case "scope":
-			if !c.NextArg() {
-				return cfg, c.ArgErr()
-			}
+		for c.NextBlock() {
+			switch c.Val() {
+			case "scope":
+				if !c.NextArg() {
+					return cfg, c.ArgErr()
+				}
 
-			cfg.Scope = c.Val()
-		case "destination":
-			if !c.NextArg() {
-				return cfg, c.ArgErr()
-			}
+				cfg.Scope = c.Val()
+			case "destination":
+				if !c.NextArg() {
+					return cfg, c.ArgErr()
+				}
 
-			i, err := os.Stat(c.Val())
-			if err != nil {
-				return cfg, c.Err(err.Error())
-			}
-			if !i.IsDir() {
-				return cfg, c.ArgErr()
-			}
+				i, err := os.Stat(c.Val())
+				if err != nil {
+					return cfg, c.Err(err.Error())
+				}
+				if !i.IsDir() {
+					return cfg, c.ArgErr()
+				}
 
-			cfg.Dest = c.Val()
-		case "filename_length":
-			if !c.NextArg() {
-				return cfg, c.ArgErr()
-			}
+				cfg.Dest = c.Val()
+			case "filename_length":
+				if !c.NextArg() {
+					return cfg, c.ArgErr()
+				}
 
-			l, err := strconv.ParseUint(c.Val(), 10, 32)
-			if err != nil {
-				return cfg, c.Err(err.Error())
-			}
+				l, err := strconv.ParseUint(c.Val(), 10, 32)
+				if err != nil {
+					return cfg, c.Err(err.Error())
+				}
 
-			cfg.Len = int(l)
+				cfg.Len = int(l)
+			}
 		}
 	}
 
