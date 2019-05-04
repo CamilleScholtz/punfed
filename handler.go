@@ -1,7 +1,9 @@
 package punfed
 
 import (
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -14,10 +16,12 @@ type handler struct {
 	Config config
 }
 
-// TODO: Check for POST Postform/Form
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 	error) {
-	if r.Method != http.MethodPost && !httpserver.Path(r.URL.Path).Matches(
+	// TODO: Scope doesn't work
+	log.Println(r.URL.Path)
+	log.Println(h.Config.Scope)
+	if r.Method != http.MethodPost || !httpserver.Path(r.URL.Path).Matches(
 		h.Config.Scope) {
 		return h.Next.ServeHTTP(w, r)
 	}
@@ -38,15 +42,14 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 }
 
 func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
-	/*k := key{r.Form["user"][0], r.Form["pass"][0]}
-	for _, ck := range config.Keys {
+	k := key{r.Form["user"][0], r.Form["pass"][0]}
+	for _, ck := range h.Config.Keys {
 		if ck == k {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("incorrect key")*/
-	return nil
+	return fmt.Errorf("incorrect key")
 }
 
 func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
@@ -73,7 +76,7 @@ func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		//fmt.Fprintln(w, path.Join(config.URL, fn))
+		fmt.Fprintln(w, path.Join(h.Config.Dest, fn))
 	}
 
 	return nil

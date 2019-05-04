@@ -3,6 +3,7 @@ package punfed
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/mholt/caddy"
 )
@@ -13,7 +14,12 @@ type config struct {
 
 	Len int
 
-	//Keys []key
+	Keys []key
+}
+
+type key struct {
+	User string
+	Pass string
 }
 
 func parseConfig(c *caddy.Controller) (*config, error) {
@@ -41,6 +47,15 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 			}
 
 			cfg.Dest = c.Val()
+		case "keys":
+			if !c.NextArg() {
+				return cfg, c.ArgErr()
+			}
+
+			for _, s := range strings.Split(c.Val(), ",") {
+				k := strings.SplitN(s, ":", 2)
+				cfg.Keys = append(cfg.Keys, key{k[0], k[1]})
+			}
 		case "filename_length":
 			if !c.NextArg() {
 				return cfg, c.ArgErr()
