@@ -66,7 +66,7 @@ func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		n, err := os.Create(path.Join(h.Config.Dest, fn))
+		n, err := os.Create(path.Join(h.Config.Save, r.Form["user"][0], fn))
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		fmt.Fprintln(w, path.Join(h.Config.Dest, fn))
+		fmt.Fprintln(w, path.Join(h.Config.Serve, fn))
 	}
 
 	return nil
