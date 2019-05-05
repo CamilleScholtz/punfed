@@ -58,15 +58,16 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 
 			cfg.Serve = c.Val()
 		case "keys":
-			if !c.NextArg() {
+			kl := c.RemainingArgs()
+			if len(kl) == 0 {
 				return cfg, c.ArgErr()
 			}
 
-			for _, s := range strings.Split(c.Val(), " ") {
-				k := strings.SplitN(s, ":", 2)
-				cfg.Keys = append(cfg.Keys, key{k[0], k[1]})
+			for _, k := range kl {
+				up := strings.SplitN(k, ":", 2)
+				cfg.Keys = append(cfg.Keys, key{up[0], up[1]})
 
-				if err := os.MkdirAll(path.Join(cfg.Save, k[0]), os.
+				if err := os.MkdirAll(path.Join(cfg.Save, up[0]), os.
 					ModePerm); err != nil {
 					return cfg, c.ArgErr()
 				}
