@@ -9,13 +9,12 @@ import (
 )
 
 type config struct {
+	Key   string
 	Scope string
 	Save  string
 	Serve string
-
-	Len int
-
-	Keys []key
+	Len   int
+	Keys  []key
 }
 
 type key struct {
@@ -24,7 +23,10 @@ type key struct {
 }
 
 func parseConfig(c *caddy.Controller) (*config, error) {
-	cfg := &config{}
+	cfg := &config{
+		Key: c.Key,
+		Len: 4,
+	}
 
 	for c.Next() {
 		if !c.NextArg() {

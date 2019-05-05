@@ -75,7 +75,7 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		fmt.Fprintln(w, path.Join(h.Config.Serve, fn))
+		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, fn))
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, f := range fl {
-		fmt.Fprintln(w, path.Join(h.Config.Serve, f.Name()))
+		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, f.Name()))
 	}
 
 	return nil
