@@ -3,7 +3,7 @@ package punfed
 import (
 	"fmt"
 	"io"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -18,31 +18,30 @@ type handler struct {
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 	error) {
-	// TODO: Scope doesn't work
-	log.Println(r.URL.Path)
-	log.Println(h.Config.Scope)
 	if r.Method != http.MethodPost || !httpserver.Path(r.URL.Path).Matches(
 		h.Config.Scope) {
 		return h.Next.ServeHTTP(w, r)
-	}
-
-	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		return http.StatusBadRequest, err
 	}
 
 	if err := h.key(w, r); err != nil {
 		return http.StatusUnauthorized, err
 	}
 
-	if err := h.file(w, r); err != nil {
-		return http.StatusBadRequest, err
+	if r.FormValue("upload") != "" {
+		if err := h.upload(w, r); err != nil {
+			return http.StatusBadRequest, err
+		}
+	} else {
+		if err := h.view(w, r); err != nil {
+			return http.StatusBadRequest, err
+		}
 	}
 
 	return http.StatusCreated, nil
 }
 
 func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
-	k := key{r.Form["user"][0], r.Form["pass"][0]}
+	k := key{r.FormValue("user"), r.FormValue("pass")}
 	for _, ck := range h.Config.Keys {
 		if ck == k {
 			return nil
@@ -52,7 +51,7 @@ func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
 	return fmt.Errorf("incorrect key")
 }
 
-func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
+func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 	fl := r.MultipartForm.File["files[]"]
 	for i, fh := range fl {
 		f, err := fl[i].Open()
@@ -66,7 +65,7 @@ func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		n, err := os.Create(path.Join(h.Config.Save, r.Form["user"][0], fn))
+		n, err := os.Create(path.Join(h.Config.Save, r.FormValue("user"), fn))
 		if err != nil {
 			return err
 		}
@@ -77,6 +76,19 @@ func (h *handler) file(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		fmt.Fprintln(w, path.Join(h.Config.Serve, fn))
+	}
+
+	return nil
+}
+
+func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
+	fl, err := ioutil.ReadDir(path.Join(h.Config.Save, r.FormValue("user")))
+	if err != nil {
+		return err
+	}
+
+	for _, f := range fl {
+		fmt.Fprintln(w, path.Join(h.Config.Serve, f.Name()))
 	}
 
 	return nil
