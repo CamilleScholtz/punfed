@@ -52,6 +52,19 @@ func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
 	return fmt.Errorf("incorrect key")
 }
 
+func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
+	fl, err := ioutil.ReadDir(path.Join(h.Config.Save, r.FormValue("user")))
+	if err != nil {
+		return err
+	}
+
+	for _, f := range fl {
+		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, f.Name()))
+	}
+
+	return nil
+}
+
 func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 	fl := r.MultipartForm.File["files[]"]
 	for i, fh := range fl {
@@ -78,19 +91,6 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 
 		w.Header().Add("Location", path.Join(h.Config.Serve, fn))
 		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, fn))
-	}
-
-	return nil
-}
-
-func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
-	fl, err := ioutil.ReadDir(path.Join(h.Config.Save, r.FormValue("user")))
-	if err != nil {
-		return err
-	}
-
-	for _, f := range fl {
-		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, f.Name()))
 	}
 
 	return nil

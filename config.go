@@ -2,6 +2,7 @@ package punfed
 
 import (
 	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -61,9 +62,14 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 				return cfg, c.ArgErr()
 			}
 
-			for _, s := range strings.Split(c.Val(), ",") {
+			for _, s := range strings.Split(c.Val(), " ") {
 				k := strings.SplitN(s, ":", 2)
 				cfg.Keys = append(cfg.Keys, key{k[0], k[1]})
+
+				if err := os.MkdirAll(path.Join(cfg.Save, k[0]), os.
+					ModePerm); err != nil {
+					return cfg, c.ArgErr()
+				}
 			}
 		case "filename_length":
 			if !c.NextArg() {
