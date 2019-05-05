@@ -27,16 +27,16 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return http.StatusUnauthorized, err
 	}
 
-	if r.FormValue("upload") != "" {
-		if err := h.upload(w, r); err != nil {
-			return http.StatusBadRequest, err
-		}
-	} else {
+	if r.FormValue("view") != "" {
 		if err := h.view(w, r); err != nil {
 			return http.StatusBadRequest, err
 		}
+		return http.StatusOK, nil
 	}
 
+	if err := h.view(w, r); err != nil {
+		return http.StatusBadRequest, err
+	}
 	return http.StatusCreated, nil
 }
 
@@ -75,6 +75,7 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
+		w.Header().Add("Location", path.Join(h.Config.Serve, fn))
 		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, fn))
 	}
 
