@@ -34,7 +34,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return http.StatusOK, nil
 	}
 
-	if err := h.view(w, r); err != nil {
+	if err := h.upload(w, r); err != nil {
 		return http.StatusBadRequest, err
 	}
 	return http.StatusCreated, nil
