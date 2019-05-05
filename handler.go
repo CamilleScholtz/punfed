@@ -27,6 +27,8 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return http.StatusUnauthorized, err
 	}
 
+	fmt.Println(r.FormValue("view"))
+
 	if r.FormValue("view") != "" {
 		if err := h.view(w, r); err != nil {
 			return http.StatusBadRequest, err
