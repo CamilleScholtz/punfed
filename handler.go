@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/mholt/caddy/caddyhttp/httpserver"
 )
@@ -32,7 +31,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return http.StatusUnauthorized, err
 	}
 
-	if strings.ToLower(r.FormValue("function")) == "view" {
+	if r.FormValue("function") == "view" {
 		if err := h.view(w, r); err != nil {
 			return http.StatusInternalServerError, err
 		}
