@@ -1,6 +1,7 @@
 package punfed
 
 import (
+	"io"
 	"mime/multipart"
 	"path"
 
@@ -23,6 +24,10 @@ func generateFilename(l int, f multipart.File, h *multipart.FileHeader) (string,
 		t.Extension = path.Ext(h.Filename)
 	} else {
 		t.Extension = "." + t.Extension
+	}
+
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return "", err
 	}
 
 	return r + t.Extension, nil
