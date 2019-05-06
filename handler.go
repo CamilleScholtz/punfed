@@ -93,6 +93,9 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 		if _, err := io.Copy(o, f); err != nil {
 			return err
 		}
+		if err := o.Sync(); err != nil {
+			return err
+		}
 
 		w.Header().Add("Location", path.Join(h.Config.Serve, fn))
 		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, fn))
