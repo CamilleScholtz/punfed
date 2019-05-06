@@ -23,7 +23,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return h.Next.ServeHTTP(w, r)
 	}
 
-	if err := r.ParseMultipartForm(h.Config.Max << 20); err != nil {
+	if err := r.ParseMultipartForm(h.Config.Max); err != nil {
 		return http.StatusInternalServerError, err
 	}
 
@@ -68,10 +68,13 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// TODO: Check if file is too large
 func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 	fl := r.MultipartForm.File["files[]"]
 	for i, fh := range fl {
+		if fh.Size > h.Config.Max {
+			return fmt.Errorf("file too large")
+		}
+
 		f, err := fl[i].Open()
 		if err != nil {
 			return err

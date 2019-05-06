@@ -27,7 +27,7 @@ type key struct {
 func parseConfig(c *caddy.Controller) (*config, error) {
 	cfg := &config{
 		Key: c.Key,
-		Max: 2000,
+		Max: 2000 << 20,
 		Len: 4,
 	}
 
@@ -84,7 +84,7 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 				return cfg, c.Err(err.Error())
 			}
 
-			cfg.Max = int64(l)
+			cfg.Max = int64(l) << 20
 		case "filename_length":
 			if !c.NextArg() {
 				return cfg, c.ArgErr()
