@@ -84,7 +84,7 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 				return cfg, c.Err(err.Error())
 			}
 
-			cfg.Len = int64(l)
+			cfg.Max = int64(l)
 		case "filename_length":
 			if !c.NextArg() {
 				return cfg, c.ArgErr()
