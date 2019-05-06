@@ -14,6 +14,7 @@ type config struct {
 	Scope string
 	Save  string
 	Serve string
+	Max   int64
 	Len   int
 	Keys  []key
 }
@@ -26,6 +27,7 @@ type key struct {
 func parseConfig(c *caddy.Controller) (*config, error) {
 	cfg := &config{
 		Key: c.Key,
+		Max: 2000,
 		Len: 4,
 	}
 
@@ -72,6 +74,17 @@ func parseConfig(c *caddy.Controller) (*config, error) {
 					return cfg, c.ArgErr()
 				}
 			}
+		case "max_size":
+			if !c.NextArg() {
+				return cfg, c.ArgErr()
+			}
+
+			l, err := strconv.ParseUint(c.Val(), 10, 32)
+			if err != nil {
+				return cfg, c.Err(err.Error())
+			}
+
+			cfg.Len = int64(l)
 		case "filename_length":
 			if !c.NextArg() {
 				return cfg, c.ArgErr()

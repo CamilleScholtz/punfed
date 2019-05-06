@@ -24,19 +24,23 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 		return h.Next.ServeHTTP(w, r)
 	}
 
+	if err := r.ParseMultipartForm(h.Config.Max << 20); err != nil {
+		return http.StatusInternalServerError, err
+	}
+
 	if err := h.key(w, r); err != nil {
 		return http.StatusUnauthorized, err
 	}
 
 	if strings.ToLower(r.FormValue("function")) == "view" {
 		if err := h.view(w, r); err != nil {
-			return http.StatusBadRequest, err
+			return http.StatusInternalServerError, err
 		}
 		return http.StatusOK, nil
 	}
 
 	if err := h.upload(w, r); err != nil {
-		return http.StatusBadRequest, err
+		return http.StatusInternalServerError, err
 	}
 	return http.StatusCreated, nil
 }
@@ -65,6 +69,7 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// TODO: Check if file is too large
 func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 	fl := r.MultipartForm.File["files[]"]
 	for i, fh := range fl {
@@ -79,13 +84,13 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		n, err := os.Create(path.Join(h.Config.Save, r.FormValue("user"), fn))
+		o, err := os.Create(path.Join(h.Config.Save, r.FormValue("user"), fn))
 		if err != nil {
 			return err
 		}
-		defer n.Close()
+		defer o.Close()
 
-		if _, err := io.Copy(n, f); err != nil {
+		if _, err := io.Copy(o, f); err != nil {
 			return err
 		}
 
