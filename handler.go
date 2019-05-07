@@ -62,7 +62,8 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, f := range fl {
-		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, f.Name()))
+		fmt.Fprintln(w, "https://"+path.Join(h.Config.Key, h.Config.Serve, f.
+			Name()))
 	}
 
 	return nil
@@ -100,7 +101,7 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		w.Header().Add("Location", path.Join(h.Config.Serve, fn))
-		fmt.Fprintln(w, path.Join(h.Config.Key, h.Config.Serve, fn))
+		fmt.Fprintln(w, "https://"+path.Join(h.Config.Key, h.Config.Serve, fn))
 	}
 
 	return nil
