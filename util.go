@@ -9,9 +9,17 @@ import (
 	"github.com/jmcvetta/randutil"
 )
 
-func generateFilename(l int, f multipart.File, h *multipart.FileHeader) (string,
+func (h *handler) getSaveDir() string {
+	return path.Join(h.Config.Save, h.User)
+}
+
+func (h *handler) getStoreFile() string {
+	return path.Join(h.getSaveDir(), ".punfed")
+}
+
+func (h *handler) generateFilename(f multipart.File, fn string) (string,
 	error) {
-	r, err := randutil.AlphaString(l)
+	r, err := randutil.AlphaString(h.Config.Len)
 	if err != nil {
 		return "", nil
 	}
@@ -21,7 +29,7 @@ func generateFilename(l int, f multipart.File, h *multipart.FileHeader) (string,
 		return "", err
 	}
 	if t == filetype.Unknown {
-		t.Extension = path.Ext(h.Filename)
+		t.Extension = path.Ext(fn)
 	} else {
 		t.Extension = "." + t.Extension
 	}

@@ -3,10 +3,10 @@ package punfed
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
+	"text/tabwriter"
 
 	"github.com/mholt/caddy/caddyhttp/httpserver"
 )
@@ -14,6 +14,7 @@ import (
 type handler struct {
 	Next   httpserver.Handler
 	Config config
+	User   string
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
@@ -48,6 +49,7 @@ func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
 	k := key{r.FormValue("user"), r.FormValue("pass")}
 	for _, ck := range h.Config.Keys {
 		if ck == k {
+			h.User = r.FormValue("user")
 			return nil
 		}
 	}
@@ -56,17 +58,22 @@ func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
-	fl, err := ioutil.ReadDir(path.Join(h.Config.Save, r.FormValue("user")))
+	s, err := h.unstore()
 	if err != nil {
 		return err
 	}
 
-	for _, f := range fl {
-		fmt.Fprintln(w, "https://"+path.Join(h.Config.Key, h.Config.Serve, f.
-			Name()))
+	t := tabwriter.NewWriter(w, 0, 0, 3, ' ', 0)
+	for _, d := range s.Dates {
+		fmt.Fprintln(t, d.Date.Format("2006-01-02"))
+		for _, f := range d.Files {
+			fmt.Fprintln(t, "https://"+path.Join(h.Config.Key, h.Config.Serve,
+				f.Serve)+"\t"+f.Orig)
+		}
+		fmt.Fprintln(t)
 	}
 
-	return nil
+	return t.Flush()
 }
 
 func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
@@ -82,12 +89,12 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 		}
 		defer f.Close()
 
-		fn, err := generateFilename(h.Config.Len, f, fh)
+		fn, err := h.generateFilename(f, fh.Filename)
 		if err != nil {
 			return err
 		}
 
-		o, err := os.Create(path.Join(h.Config.Save, r.FormValue("user"), fn))
+		o, err := os.Create(path.Join(h.getSaveDir(), fn))
 		if err != nil {
 			return err
 		}
@@ -97,6 +104,10 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 		if err := o.Sync(); err != nil {
+			return err
+		}
+
+		if err := h.store(fn, fh.Filename); err != nil {
 			return err
 		}
 
