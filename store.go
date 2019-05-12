@@ -27,9 +27,14 @@ func (h *handler) store(fn, ofn string) error {
 	}
 
 	n := time.Now()
-	l := s.Dates[len(s.Dates)-1]
-	if n.Year() != l.Date.Year() || n.YearDay() != l.Date.YearDay() {
+
+	if len(s.Dates) == 0 {
 		s.Dates = append(s.Dates, date{n, []file{}})
+	} else {
+		l := s.Dates[len(s.Dates)-1]
+		if n.Year() != l.Date.Year() || n.YearDay() != l.Date.YearDay() {
+			s.Dates = append(s.Dates, date{n, []file{}})
+		}
 	}
 	s.Dates[len(s.Dates)-1].Files = append(s.Dates[len(s.Dates)-1].Files, file{
 		fn, ofn})
