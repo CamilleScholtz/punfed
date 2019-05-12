@@ -4,14 +4,13 @@ import (
 	"io"
 	"mime/multipart"
 	"path"
-	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/jmcvetta/randutil"
 )
 
 func (h *handler) getSaveDir() string {
-	return path.Join(h.Config.Save, h.User, time.Now().Format("2006-01-02"))
+	return path.Join(h.Config.Save, h.User)
 }
 
 func (h *handler) getStoreFile() string {

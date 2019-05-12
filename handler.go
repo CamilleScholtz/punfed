@@ -3,7 +3,6 @@ package punfed
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -65,13 +64,17 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	t := tabwriter.NewWriter(w, 0, 0, 3, ' ', 0)
-	for _, d := range s.Dates {
-		fmt.Fprintln(t, d.Date.Format("2006-01-02"))
+	for i, d := range s.Dates {
+		fmt.Fprintln(t, d.Date.Format("* 2006-01-02"))
+
 		for _, f := range d.Files {
 			fmt.Fprintln(t, "https://"+path.Join(h.Config.Key, h.Config.Serve,
 				f.Serve)+"\t"+f.Orig)
 		}
-		fmt.Fprintln(t)
+
+		if i != len(s.Dates)-1 {
+			fmt.Fprintln(t)
+		}
 	}
 
 	return t.Flush()
@@ -109,7 +112,6 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		if err := h.store(fn, fh.Filename); err != nil {
-			log.Println(err)
 			return err
 		}
 

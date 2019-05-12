@@ -3,6 +3,7 @@ package punfed
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -27,7 +28,6 @@ func (h *handler) store(fn, ofn string) error {
 	}
 
 	n := time.Now()
-
 	if len(s.Dates) == 0 {
 		s.Dates = append(s.Dates, date{n, []file{}})
 	} else {
@@ -44,19 +44,27 @@ func (h *handler) store(fn, ofn string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(h.getStoreFile(), ns, 0644)
+	return ioutil.WriteFile(h.getStoreFile(), ns, 0666)
 }
 
 func (h *handler) unstore() (store, error) {
 	s := store{}
 
-	f, err := ioutil.ReadFile(h.getStoreFile())
+	f, err := os.OpenFile(h.getStoreFile(), os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return s, err
+	}
+	defer f.Close()
+
+	d, err := ioutil.ReadAll(f)
 	if err != nil {
 		return s, err
 	}
 
-	if err := json.Unmarshal(f, &s); err != nil {
-		return s, err
+	if len(d) > 0 {
+		if err := json.Unmarshal(d, &s); err != nil {
+			return s, err
+		}
 	}
 
 	return s, nil
