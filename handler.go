@@ -3,6 +3,7 @@ package punfed
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -108,6 +109,7 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		if err := h.store(fn, fh.Filename); err != nil {
+			log.Println(err)
 			return err
 		}
 
