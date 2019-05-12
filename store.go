@@ -1,10 +1,9 @@
 package punfed
 
 import (
-	"os"
+	"encoding/json"
+	"io/ioutil"
 	"time"
-
-	"github.com/burntSushi/toml"
 )
 
 type store struct {
@@ -22,13 +21,6 @@ type file struct {
 }
 
 func (h *handler) store(fn, ofn string) error {
-	f, err := os.OpenFile(h.getStoreFile(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
-		0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	s, err := h.unstore()
 	if err != nil {
 		return err
@@ -42,12 +34,23 @@ func (h *handler) store(fn, ofn string) error {
 	s.Dates[len(s.Dates)-1].Files = append(s.Dates[len(s.Dates)-1].Files, file{
 		fn, ofn})
 
-	return toml.NewEncoder(f).Encode(s)
+	ns, err := json.Marshal(s)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(h.getStoreFile(), ns, 0644)
 }
 
 func (h *handler) unstore() (store, error) {
 	s := store{}
-	if _, err := toml.DecodeFile(h.getStoreFile(), &s); err != nil {
+
+	f, err := ioutil.ReadFile(h.getStoreFile())
+	if err != nil {
+		return s, err
+	}
+
+	if err := json.Unmarshal(f, &s); err != nil {
 		return s, err
 	}
 

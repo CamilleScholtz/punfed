@@ -4,17 +4,18 @@ import (
 	"io"
 	"mime/multipart"
 	"path"
+	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/jmcvetta/randutil"
 )
 
 func (h *handler) getSaveDir() string {
-	return path.Join(h.Config.Save, h.User)
+	return path.Join(h.Config.Save, h.User, time.Now().Format("2006-01-02"))
 }
 
 func (h *handler) getStoreFile() string {
-	return path.Join(h.getSaveDir(), ".punfed")
+	return path.Join(h.getSaveDir(), ".punfed.json")
 }
 
 func (h *handler) generateFilename(f multipart.File, fn string) (string,
