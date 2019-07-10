@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mholt/caddy"
+	"github.com/caddyserver/caddy"
 )
 
 type config struct {
