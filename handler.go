@@ -7,24 +7,63 @@ import (
 	"os"
 	"path"
 	"text/tabwriter"
-
-	"github.com/caddyserver/caddy/caddyhttp/httpserver"
 )
 
 type handler struct {
-	Next   httpserver.Handler
-	Config config
+	Next   http.Handler
+	Config *ScopeConfiguration
+	Scope  string
 	User   string
 }
 
-func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
-	error) {
-	if r.Method != http.MethodPost || !httpserver.Path(r.URL.Path).Matches(
-		h.Config.Scope) {
-		return h.Next.ServeHTTP(w, r)
+// NewHandler creates a new instance of this plugin's upload handler.
+func NewHandler(s string, c *ScopeConfiguration, n http.Handler) (
+	*handler, error) {
+	h := handler{
+		Next:   n,
+		Config: c,
+		Scope:  s,
 	}
 
-	if err := r.ParseMultipartForm(h.Config.Max); err != nil {
+	if n == nil {
+		h.Next = http.NotFoundHandler()
+	}
+
+	return &h, nil
+}
+
+// ServeHTTP handles any uploads, else defers the request to the next handler.
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var cn bool
+
+	httpCode, err := h.serveHTTP(w, r, h.Scope, func(w http.ResponseWriter,
+		r *http.Request) (int, error) {
+		cn = true
+		return 0, nil
+	})
+
+	if cn {
+		h.Next.ServeHTTP(w, r)
+		return
+	}
+
+	if httpCode >= 400 && err != nil {
+		http.Error(w, err.Error(), httpCode)
+	} else {
+		w.WriteHeader(httpCode)
+	}
+}
+
+func (h *handler) serveHTTP(w http.ResponseWriter, r *http.Request, s string,
+	nf func(http.ResponseWriter, *http.Request) (int, error)) (
+	int, error) {
+	//|| !httpserver.Path(r.URL.Path).Matches(s)
+
+	if r.Method != http.MethodPost {
+		return nf(w, r)
+	}
+
+	if err := r.ParseMultipartForm(h.Config.MaxFilesize); err != nil {
 		return http.StatusInternalServerError, err
 	}
 
@@ -47,7 +86,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (int,
 
 func (h *handler) key(w http.ResponseWriter, r *http.Request) error {
 	k := key{r.FormValue("user"), r.FormValue("pass")}
-	for _, ck := range h.Config.Keys {
+	for _, ck := range h.Config.AcceptedKeys {
 		if ck == k {
 			h.User = r.FormValue("user")
 			return nil
@@ -68,8 +107,8 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 		fmt.Fprintln(t, d.Date.Format("* 2006-01-02"))
 
 		for _, f := range d.Files {
-			fmt.Fprintln(t, "https://"+path.Join(h.Config.Key, h.Config.Serve,
-				f.Serve)+"\t"+f.Orig)
+			fmt.Fprintln(t, "https://"+path.Join(h.Config.ServePath, f.Serve)+
+				"\t"+f.Orig)
 		}
 
 		if i != len(s.Dates)-1 {
@@ -83,7 +122,7 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 	fl := r.MultipartForm.File["files[]"]
 	for i, fh := range fl {
-		if fh.Size > h.Config.Max {
+		if fh.Size > h.Config.MaxFilesize {
 			return fmt.Errorf("file too large")
 		}
 
@@ -115,8 +154,8 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		w.Header().Add("Location", path.Join(h.Config.Serve, fn))
-		fmt.Fprintln(w, "https://"+path.Join(h.Config.Key, h.Config.Serve, fn))
+		w.Header().Add("Location", path.Join(h.Config.ServePath, fn))
+		fmt.Fprintln(w, "https://"+path.Join(h.Config.ServePath, fn))
 	}
 
 	return nil

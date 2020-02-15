@@ -1,27 +1,34 @@
 package punfed
 
-import (
-	"github.com/caddyserver/caddy"
-	"github.com/caddyserver/caddy/caddyhttp/httpserver"
-)
+// ScopeConfiguration represents the settings of a scope (URL path).
+type ScopeConfiguration struct {
+	// The maximum filesize.
+	MaxFilesize int64
 
-func init() {
-	caddy.RegisterPlugin("punfed", caddy.Plugin{
-		ServerType: "http",
-		Action:     setup,
-	})
+	// Target directory on disk that serves as upload destination.
+	WritePath string
+
+	// Uploaded files can be gotten back from here.
+	ServePath string
+
+	// The lenght of generated random filenames.
+	RandomFilenameLenght int
+
+	// The accepted username & password combinations.
+	AcceptedKeys []key
 }
 
-func setup(c *caddy.Controller) error {
-	cfg, err := parseConfig(c)
-	if err != nil {
-		return err
+type key struct {
+	User string
+	Pass string
+}
+
+// NewDefaultConfiguration creates a new default configuration.
+func NewDefaultConfiguration(targetDirectory string) *ScopeConfiguration {
+	cfg := ScopeConfiguration{
+		MaxFilesize:          2000 << 20,
+		RandomFilenameLenght: 4,
 	}
 
-	s := httpserver.GetConfig(c)
-	s.AddMiddleware(func(next httpserver.Handler) httpserver.Handler {
-		return &handler{Next: next, Config: *cfg}
-	})
-
-	return nil
+	return &cfg
 }
