@@ -10,7 +10,7 @@ import (
 )
 
 func (h *handler) getSaveDir() string {
-	return path.Join(h.Config.Save, h.User)
+	return path.Join(h.Config.ServePath, h.User)
 }
 
 func (h *handler) getStoreFile() string {
@@ -19,7 +19,7 @@ func (h *handler) getStoreFile() string {
 
 func (h *handler) generateFilename(f multipart.File, fn string) (string,
 	error) {
-	r, err := randutil.AlphaString(h.Config.Len)
+	r, err := randutil.AlphaString(h.Config.RandomFilenameLenght)
 	if err != nil {
 		return "", nil
 	}
