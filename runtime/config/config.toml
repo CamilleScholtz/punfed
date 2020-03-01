@@ -1,0 +1,22 @@
+# Root URL.
+Root = "https://camille.sh"
+
+# URL & port to listen to.
+Listen = "localhost:1337"
+
+# Target directory on disk that serves as upload destination.
+WritePath = "/srv/camille.sh/upload"
+
+# Uploaded files can be gotten back from here.
+ServePath = "/"
+
+# The maximum filesize in MB.
+MaxFileSize = 1000
+
+# The lenght of generated random filenames.
+RandomFilenameLenght = 4
+
+# The accepted username & password combinations.
+AcceptedKeys = [
+	{User = "onodera", Pass = "Cranberry1"},
+]
