@@ -18,5 +18,5 @@ RandomFilenameLenght = 4
 
 # The accepted username & password combinations.
 AcceptedKeys = [
-	{User = "onodera", Pass = "Cranberry1"},
+	{User = "username", Pass = "password"},
 ]
