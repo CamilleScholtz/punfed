@@ -1,4 +1,4 @@
-package punfed
+package main
 
 import (
 	"encoding/json"
