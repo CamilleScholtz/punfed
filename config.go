@@ -31,8 +31,8 @@ type key struct {
 func parseConfig() (*config, error) {
 	c := &config{}
 
-	if _, err := toml.DecodeFile("/etc/punfed/upload.toml", c); err != nil {
-		return nil, fmt.Errorf("config %s: %s", "/etc/punfed/upload.toml", err)
+	if _, err := toml.DecodeFile("/etc/punfed/config.toml", c); err != nil {
+		return nil, fmt.Errorf("config %s: %s", "/etc/punfed/config.toml", err)
 	}
 
 	// Convert `MaxFileSize` to MB.
