@@ -8,6 +8,8 @@ import (
 	"os"
 	"path"
 	"text/tabwriter"
+
+	urljoin "github.com/shimohq/go-url-join"
 )
 
 type handler struct {
@@ -63,7 +65,7 @@ func (h *handler) upload(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		fmt.Fprintln(w, path.Join(h.getServePath(), fn))
+		fmt.Fprintln(w, urljoin.Join(h.Config.Root, h.Config.ServePath, fn))
 	}
 
 	return nil
@@ -80,8 +82,8 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 		fmt.Fprintln(t, d.Date.Format("* 2006-01-02"))
 
 		for _, f := range d.Files {
-			fmt.Fprintln(t, "https://"+path.Join(h.Config.ServePath, f.Serve)+
-				"\t"+f.Orig)
+			fmt.Fprintln(t, urljoin.Join("https://", h.Config.Root, h.Config.
+				ServePath, f.Serve)+"\t"+f.Orig)
 		}
 
 		if i != len(s.Dates)-1 {

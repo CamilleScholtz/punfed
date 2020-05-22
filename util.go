@@ -13,10 +13,6 @@ func (h *handler) getWritePath() string {
 	return path.Join(h.Config.WritePath, h.User)
 }
 
-func (h *handler) getServePath() string {
-	return path.Join(h.Config.Root, h.Config.ServePath)
-}
-
 func (h *handler) getStoreFile() string {
 	return path.Join(h.getWritePath(), ".store.json")
 }
