@@ -82,8 +82,8 @@ func (h *handler) view(w http.ResponseWriter, r *http.Request) error {
 		fmt.Fprintln(t, d.Date.Format("* 2006-01-02"))
 
 		for _, f := range d.Files {
-			fmt.Fprintln(t, urljoin.Join("https://", h.Config.Root, h.Config.
-				ServePath, f.Serve)+"\t"+f.Orig)
+			fmt.Fprintln(t, urljoin.Join(h.Config.Root, h.Config.ServePath, f.
+				Serve)+"\t"+f.Orig)
 		}
 
 		if i != len(s.Dates)-1 {
