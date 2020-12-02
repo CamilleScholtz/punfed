@@ -2,7 +2,7 @@
 Root = "https://camille.sh"
 
 # URL & port to listen to.
-Listen = "localhost:1337"
+Listen = "camille.sh:1337"
 
 # Target directory on disk that serves as upload destination.
 WritePath = "/srv/camille.sh/upload"
